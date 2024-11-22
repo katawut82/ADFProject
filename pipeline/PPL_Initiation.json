@@ -1,0 +1,47 @@
+{
+	"name": "PPL_Initiation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load SourceDetail",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_OneTimeLoadSourceDetail",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load DimDate",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load SourceDetail",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedDimDate",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
