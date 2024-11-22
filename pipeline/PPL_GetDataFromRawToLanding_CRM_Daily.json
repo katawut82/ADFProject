@@ -1,0 +1,112 @@
+{
+	"name": "PPL_GetDataFromRawToLanding_CRM_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Source Entity Name",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlPoolSource",
+						"sqlReaderQuery": "select s.id,s.EntityName,[IsEnabled],RawLocation,LandingLocation,CopyUsingSPToDB\nfrom [JobConfig].[SourceDetail] s\nwhere [IsEnabled] = 1 and [IsRawProcessed] = 1",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "DS_SynapsePool",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach Get Source Data",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Source Entity Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Source Entity Name').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy Data From Raw To Landing",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_DataLake_AtLocation_Binary",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileLocation": {
+											"value": "@item().RawLocation",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DataLake_AtLocation_Binary",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileLocation": {
+											"value": "@concat(item().LandingLocation,'/',formatDateTime(utcNow(),'yyyy-MM-dd'),'/',formatDateTime(utcNow(),'HH'),'/',formatDateTime(utcNow(),'mm'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-19T03:23:36Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

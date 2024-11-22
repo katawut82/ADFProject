@@ -1,0 +1,57 @@
+{
+	"name": "PPL_LoadCuratedDimMarketSegment",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load INT DimMarketSegment",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "athkwbathfittersqlpool",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[Int].[SP_Load_INT_DimMarketSegment]"
+				}
+			},
+			{
+				"name": "Load Curated DimMarketSegment",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Load INT DimMarketSegment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "athkwbathfittersqlpool",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[Curated].[SP_Load_Curated_DimMarketSegment]"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-20T07:50:00Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

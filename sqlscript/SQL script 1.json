@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "select * from JobConfig.SourceDetail\n\nselect * from JobConfig.JobLastRun\nselect * from JobConfig.JobRunHistory\n\nselect * from Lkp.Filteredbfr_bfusetup\nselect * from Lkp.Filteredbfr_managementdistrict\nselect * from Lkp.FilteredBusinessUnit\nselect * from Lkp.FilteredCampaign\nselect * from Lkp.FilteredOpportunity\nselect * from Lkp.FilteredSystemUser\n\nselect * from Int.DimCampaign\nselect * from Int.DimCampaignReject\nselect * from Curated.DimCampaign\nselect * from Int.DimLocation\nselect * from Int.DimLocationReject\nselect * from Curated.DimLocation\nselect * from Int.DimEmployee\nselect * from Int.DimEmployeeReject\nselect * from Curated.DimEmployee\nselect * from Int.DimLeadStatus\nselect * from Int.DimLeadStatusReject\nselect * from Curated.DimLeadStatus\nselect * from Int.DimMarketSegment\nselect * from Int.DimMarketSegmentReject\nselect * from Curated.DimMarketSegment\nselect * from Int.FactLead\nselect * from Int.FactLeadReject\nselect * from Int.FactLeadDeleted\nselect * from Curated.FactLead",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "athkwbathfittersqlpool",
+				"poolName": "athkwbathfittersqlpool"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"name": "DS_SQLSERVER_CRM",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "athkwbathfittersqlserver",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

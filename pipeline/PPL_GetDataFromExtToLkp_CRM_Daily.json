@@ -1,0 +1,303 @@
+{
+	"name": "PPL_GetDataFromExtToLkp_CRM_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Source Entity Name",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlPoolSource",
+						"sqlReaderQuery": "select s.id,s.EntityName,[IsEnabled],RawLocation,LandingLocation,CopyUsingSPToDB,MergeUsingSPToLKP,COALESCE([ExtractEndTime],'2000-01-01') as ExtractStartTime\n,COALESCE((select ExtractEndTime from [JobConfig].[BatchTime] where IsBatchCompleted = 0), GETUTCDATE()) as ExtractEndTime\nfrom [JobConfig].[SourceDetail] s\nLeft join [JobConfig].[JobLastRun] r\non s.id=r.sourceDetailId\nwhere [IsEnabled] = 1 and [IsRawProcessed] = 1 and [IsLKPProcessed] = 0",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "DS_SynapsePool",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach Get Source Data",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Source Entity Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Source Entity Name').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Make Entry For Job Run Success",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Merge Data from EXT to LKP",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[JobConfig].[SP_LoadJobRunDetails]",
+								"storedProcedureParameters": {
+									"Comments": {
+										"value": "",
+										"type": "String"
+									},
+									"EntityName": {
+										"value": {
+											"value": "@item().EntityName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ExtractEndtime": {
+										"value": {
+											"value": "@item().ExtractEndTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"ExtractStartTime": {
+										"value": {
+											"value": "@item().ExtractStartTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobEndTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobStartTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"SourceDetailId": {
+										"value": {
+											"value": "@item().id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Status": {
+										"value": "Success",
+										"type": "String"
+									},
+									"StoredProcedureName": {
+										"value": "null",
+										"type": "String"
+									},
+									"Zone": {
+										"value": "raw",
+										"type": "String"
+									}
+								}
+							}
+						},
+						{
+							"name": "Make Entry For Job Run Failure",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Merge Data from EXT to LKP",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[JobConfig].[SP_LoadJobRunDetails]",
+								"storedProcedureParameters": {
+									"Comments": {
+										"value": {
+											"value": "@activity('Merge Data from EXT to LKP').output.error[0].Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"EntityName": {
+										"value": {
+											"value": "@item().EntityName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ExtractEndtime": {
+										"value": {
+											"value": "@item().ExtractEndTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"ExtractStartTime": {
+										"value": {
+											"value": "@item().ExtractStartTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobEndTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobStartTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"SourceDetailId": {
+										"value": {
+											"value": "@item().id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Status": {
+										"value": "Failure",
+										"type": "String"
+									},
+									"StoredProcedureName": {
+										"value": "null",
+										"type": "String"
+									},
+									"Zone": {
+										"value": "raw",
+										"type": "String"
+									}
+								}
+							}
+						},
+						{
+							"name": "Update IsLKPProcessed",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Make Entry For Job Run Success",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[JobConfig].[SP_UpdateSourceDetailProcessed]",
+								"storedProcedureParameters": {
+									"EntityName": {
+										"value": {
+											"value": "@item().EntityName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SourceDetailId": {
+										"value": {
+											"value": "@item().id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Zone": {
+										"value": "lkp",
+										"type": "String"
+									}
+								}
+							}
+						},
+						{
+							"name": "Merge Data from EXT to LKP",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@item().MergeUsingSPToLKP",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-19T04:11:56Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

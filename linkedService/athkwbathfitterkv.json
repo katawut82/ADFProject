@@ -1,0 +1,11 @@
+{
+	"name": "athkwbathfitterkv",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://ath-kw-bathfitter-kv.vault.azure.net/"
+		}
+	}
+}

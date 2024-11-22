@@ -1,0 +1,57 @@
+{
+	"name": "PPL_LoadCuratedDimEmployee",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load INT DimEmployee",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "athkwbathfittersqlpool",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[Int].[SP_Load_INT_DimEmployee]"
+				}
+			},
+			{
+				"name": "Load Curated DimEmployee",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Load INT DimEmployee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "athkwbathfittersqlpool",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[Curated].[SP_Load_Curated_DimEmployee]"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-20T06:10:17Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

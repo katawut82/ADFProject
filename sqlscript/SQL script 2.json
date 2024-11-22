@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"content": {
+			"query": "CREATE TABLE [Curated].[DimProvider] (\n\t[ProviderSK]             INT   NULL,\n    [ProviderSourceId]             INT          NULL,\n    [dwEffectiveFrom]          DATETIME         NULL,\n    [dwEffectiveTo]            DATETIME         NULL,\n    [dwActiveRec]              BIT              NULL,\n    [dwCreateDate]             DATETIME         NULL,\n    [dwUpdateDate]             DATETIME         NULL,\n    [dwType1Hash]              VARBINARY (8000) NULL,\n    [dwType2Hash]              VARBINARY (8000) NULL\n)\nWITH (CLUSTERED COLUMNSTORE INDEX, DISTRIBUTION = ROUND_ROBIN);\n\nCREATE TABLE [Curated].[FactLead] (\n    [LeadSK]          INT              IDENTITY (1, 1) NOT NULL,\n    [LeadBK]          VARCHAR (100)    NULL,\n    [LeadSourceID]    VARCHAR (100)    NULL,\n    [CampaignSK]      INT              NULL,\n    [MarketSegmentSK] INT              NULL,\n    [StatusSK]        INT              NULL,\n    [Rehash]          BIT              NULL,\n    [LeadDateSK]      INT              NULL,\n    [LocationSK]      INT              NULL,\n    [BookerSK]        INT              NULL,\n    [ProviderSK]      INT              NULL,\n    [LeadDate]        DATETIME         NULL,\n    [dwEffectiveFrom] DATETIME         NULL,\n    [dwEffectiveTo]   DATETIME         NULL,\n    [dwActiveRec]     BIT              NULL,\n    [dwCreateDate]    DATETIME         NULL,\n    [dwUpdateDate]    DATETIME         NULL,\n    [dwType1Hash]     VARBINARY (8000) NULL,\n    [dwType2Hash]     VARBINARY (8000) NULL\n)\nWITH (CLUSTERED COLUMNSTORE INDEX, DISTRIBUTION = HASH([LeadBK]));\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "athkwbathfittersqlpool",
+				"poolName": "athkwbathfittersqlpool"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

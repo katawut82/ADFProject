@@ -1,0 +1,22 @@
+{
+	"name": "athkwbathfittersqlserver",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "athkwbathfitterkv",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "athkwbathfitterconnectionstring"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

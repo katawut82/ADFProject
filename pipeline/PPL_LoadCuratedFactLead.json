@@ -1,0 +1,57 @@
+{
+	"name": "PPL_LoadCuratedFactLead",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load INT FactLead",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "athkwbathfittersqlpool",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[Int].[SP_Load_INT_FactLead]"
+				}
+			},
+			{
+				"name": "Load Curated FactLead",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Load INT FactLead",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "athkwbathfittersqlpool",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[Curated].[SP_Load_Curated_FactLead]"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-20T08:35:30Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

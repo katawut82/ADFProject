@@ -1,0 +1,396 @@
+{
+	"name": "PPL_GetDataFromSourceToRaw_CRM_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Source Entity Name",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlPoolSource",
+						"sqlReaderStoredProcedureName": "[JobConfig].[SP_GetLookUpQuerySource]",
+						"storedProcedureParameters": {
+							"Frequency": {
+								"type": "String",
+								"value": "D"
+							},
+							"SourceArea": {
+								"type": "String",
+								"value": "CRM"
+							},
+							"SourceName": {
+								"type": "String",
+								"value": "CRM"
+							},
+							"SourceType": {
+								"type": "String",
+								"value": "Sql"
+							}
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "DS_SynapsePool",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach Get Source Data",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Source Entity Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Source Entity Name').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Delete Data From Raw Location",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_DataLake_DeleteFiles",
+									"type": "DatasetReference",
+									"parameters": {
+										"FilePath": {
+											"value": "@item().RawLocation",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						},
+						{
+							"name": "Get Data From Source",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Delete Data From Raw Location",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@item().sourceQuery",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_SQLSERVER_CRM",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DataLake_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"FilePath": {
+											"value": "@item().RawLocation",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Make Entry For Job Run Success",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Get Data From Source",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[JobConfig].[SP_LoadJobRunDetails]",
+								"storedProcedureParameters": {
+									"Comments": {
+										"value": "",
+										"type": "String"
+									},
+									"EntityName": {
+										"value": {
+											"value": "@item().EntityName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ExtractEndtime": {
+										"value": {
+											"value": "@item().ExtractEndTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"ExtractStartTime": {
+										"value": {
+											"value": "@item().ExtractStartTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobEndTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobStartTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"SourceDetailId": {
+										"value": {
+											"value": "@item().id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Status": {
+										"value": "Success",
+										"type": "String"
+									},
+									"StoredProcedureName": {
+										"value": "null",
+										"type": "String"
+									},
+									"Zone": {
+										"value": "raw",
+										"type": "String"
+									}
+								}
+							}
+						},
+						{
+							"name": "Make Entry For Job Run Failure",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Get Data From Source",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[JobConfig].[SP_LoadJobRunDetails]",
+								"storedProcedureParameters": {
+									"Comments": {
+										"value": {
+											"value": "@activity('Get Data From Source').output.error[0].Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"EntityName": {
+										"value": {
+											"value": "@item().EntityName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ExtractEndtime": {
+										"value": {
+											"value": "@item().ExtractEndTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"ExtractStartTime": {
+										"value": {
+											"value": "@item().ExtractStartTime",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobEndTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"JobStartTime": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"SourceDetailId": {
+										"value": {
+											"value": "@item().id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Status": {
+										"value": "Failure",
+										"type": "String"
+									},
+									"StoredProcedureName": {
+										"value": "null",
+										"type": "String"
+									},
+									"Zone": {
+										"value": "raw",
+										"type": "String"
+									}
+								}
+							}
+						},
+						{
+							"name": "Update IsRawProcessed",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Make Entry For Job Run Success",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "athkwbathfittersqlpool",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[JobConfig].[SP_UpdateSourceDetailProcessed]",
+								"storedProcedureParameters": {
+									"EntityName": {
+										"value": {
+											"value": "@item().EntityName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SourceDetailId": {
+										"value": {
+											"value": "@item().id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"Zone": {
+										"value": "raw",
+										"type": "String"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-18T06:40:32Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

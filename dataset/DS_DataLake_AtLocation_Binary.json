@@ -1,0 +1,27 @@
+{
+	"name": "DS_DataLake_AtLocation_Binary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ath-kw-bathfitter-workspace-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileLocation": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().FileLocation",
+					"type": "Expression"
+				},
+				"fileSystem": "synapse"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}
