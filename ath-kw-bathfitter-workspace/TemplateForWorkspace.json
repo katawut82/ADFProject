@@ -333,6 +333,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "Single"
+				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-19T04:11:56Z"
 			},
@@ -453,6 +456,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Single"
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-19T03:23:36Z"
@@ -860,6 +866,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "Single"
+				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-18T06:40:32Z"
 			},
@@ -869,6 +878,64 @@
 				"[concat(variables('workspaceId'), '/datasets/DS_SQLSERVER_CRM')]",
 				"[concat(variables('workspaceId'), '/datasets/DS_DataLake_Parquet')]",
 				"[concat(variables('workspaceId'), '/sqlPools/athkwbathfittersqlpool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PPL_Initiation')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load SourceDetail",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PPL_OneTimeLoadSourceDetail",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Load DimDate",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Load SourceDetail",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PPL_LoadCuratedDimDate",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/PPL_OneTimeLoadSourceDetail')]",
+				"[concat(variables('workspaceId'), '/pipelines/PPL_LoadCuratedDimDate')]"
 			]
 		},
 		{
@@ -928,6 +995,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "Single"
+				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-20T06:10:06Z"
 			},
@@ -974,6 +1044,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Single"
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-18T04:26:20Z"
@@ -1039,6 +1112,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "Single"
+				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-20T06:10:17Z"
 			},
@@ -1102,6 +1178,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Single"
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-20T07:49:53Z"
@@ -1167,6 +1246,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "Single"
+				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-20T06:10:21Z"
 			},
@@ -1230,6 +1312,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Single"
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-20T07:50:00Z"
@@ -1295,6 +1380,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "Single"
+				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-20T08:35:30Z"
 			},
@@ -1331,6 +1419,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Single"
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-11-18T04:53:50Z"
