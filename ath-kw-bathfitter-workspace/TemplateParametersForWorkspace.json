@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "ath-kw-bathfitter-workspace"
+		},
+		"ath-kw-bathfitter-workspace-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:ath-kw-bathfitter-workspace.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"ath-kw-bathfitter-workspace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://athkwbathfitter.dfs.core.windows.net"
+		},
+		"athkwbathfitterkv_properties_typeProperties_baseUrl": {
+			"value": "https://ath-kw-bathfitter-kv.vault.azure.net/"
+		},
+		"athkwbathfittersqlserver_properties_typeProperties_connectionString_secretName": {
+			"value": "athkwbathfitterconnectionstring"
+		}
+	}
+}
