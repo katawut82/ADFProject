@@ -1,0 +1,208 @@
+{
+	"name": "PPL_master",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Data from Source to Raw",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_GetDataFromSourceToRaw_CRM_Daily",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Get Data from Raw to Landing",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Get Data from Source to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_GetDataFromRawToLanding_CRM_Daily",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Get Data from Ext to Lkp",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Get Data from Raw to Landing",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_GetDataFromExtToLkp_CRM_Daily",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load DimCampaign",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Get Data from Ext to Lkp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedDimCampaign",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load DimLocation",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load DimCampaign",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedDimLocation",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load DimEmployee",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load DimLocation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedDimEmployee",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load DimMarketSegment",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load DimEmployee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedDimMarketSegment",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load DimLeadStatus",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load DimMarketSegment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedDimLeadStatus",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load FactLead",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load DimLeadStatus",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PPL_LoadCuratedFactLead",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
